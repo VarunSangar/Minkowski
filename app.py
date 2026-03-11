@@ -104,13 +104,10 @@ code {
 """, unsafe_allow_html=True)
 
 # ── Import pages ─────────────────────────────────────────────────────────────
-from pages_modules import (
-    import pages_modules.page_minksum.py as page_minksum.py
-    import pages_modules.page_support_explorer as page_support_explorer
-    import pages_modules.page_neuro_hull as page_neuro_hull
-    import pages_modules.page_about as page_about
-)
-
+import pages_modules.page_minksum as page_minksum
+import pages_modules.page_support_explorer as page_support_explorer
+import pages_modules.page_neuro_hull as page_neuro_hull
+import pages_modules.page_about as page_about
 # ── Sidebar navigation ────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## ⬡ Minkowski Lab")
