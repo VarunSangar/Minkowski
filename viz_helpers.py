@@ -267,15 +267,15 @@ def figure_support_polar(
         (hQ, PALETTE["Q"],   "h_Q"),
         (hS, PALETTE["sum"], "h_{P⊕Q}"),
     ]:
-        fig.add_trace(go.Scatterpolar(
-            r=hs, theta=np.degrees(thetas),
-            mode="lines",
-            line=dict(color=color, width=2),
-            name=name,
-            fill="toself",
-            fillcolor=color.replace(")", ",0.07)").replace("rgb", "rgba")
-                if color.startswith("rgb") else color + "18",
-        ))
+    fig.add_trace(go.Scatterpolar(
+        r=hs, theta=np.degrees(thetas),
+        mode="lines",
+        line=dict(color=color, width=2),
+        name=name,
+        fill="toself",
+        # Fix: Use a Plotly-safe color string for transparency
+        fillcolor="rgba(125, 125, 125, 0.1)" 
+    ))
 
     fig.update_layout(
         polar=dict(
