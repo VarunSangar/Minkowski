@@ -105,7 +105,7 @@ code {
 
 # ── Import pages ─────────────────────────────────────────────────────────────
 from pages_modules import (
-    import pages_modules.page_minksum as page_minksum
+    import pages_modules.page_minksum as page_minksum.py
     import pages_modules.page_support_explorer as page_support_explorer
     import pages_modules.page_neuro_hull as page_neuro_hull
     import pages_modules.page_about as page_about
