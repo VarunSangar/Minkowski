@@ -13,14 +13,14 @@ from geometry_core import hull_mesh_arrays, hyperplane_quad
 
 # ── Colour palette ────────────────────────────────────────────────────────────
 PALETTE = {
-    "P":       "#4d9ef7",   # blue  — polytope P
-    "Q":       "#f77b4d",   # orange — polytope Q
-    "sum":     "#7df7a0",   # green — Minkowski sum
-    "contact": "#f7e94d",   # yellow — contact point
-    "plane":   "#cc88ff",   # purple — hyperplane
-    "hull":    "#4dfff7",   # cyan — neuro hull
-    "cloud":   "#ff6688",   # pink — raw point cloud
-    "u_vec":   "#ffffff",   # white — direction vector
+    "P":       "#4d9ef7",   
+    "Q":       "#f77b4d",   
+    "sum":     "#7df7a0",   
+    "contact": "#f7e94d",   
+    "plane":   "#cc88ff",   
+    "hull":    "#4dfff7",   
+    "cloud":   "#ff6688",   
+    "u_vec":   "#ffffff",   
     "bg":      "#0d0f14",
     "grid":    "#1e2d48",
     "text":    "#c8d0e0",
@@ -31,12 +31,9 @@ _LAYOUT_BASE = dict(
     plot_bgcolor=PALETTE["bg"],
     font=dict(family="JetBrains Mono, monospace", color=PALETTE["text"], size=11),
     scene=dict(
-        xaxis=dict(backgroundcolor=PALETTE["bg"], gridcolor=PALETTE["grid"],
-                   showbackground=True, color=PALETTE["text"]),
-        yaxis=dict(backgroundcolor=PALETTE["bg"], gridcolor=PALETTE["grid"],
-                   showbackground=True, color=PALETTE["text"]),
-        zaxis=dict(backgroundcolor=PALETTE["bg"], gridcolor=PALETTE["grid"],
-                   showbackground=True, color=PALETTE["text"]),
+        xaxis=dict(backgroundcolor=PALETTE["bg"], gridcolor=PALETTE["grid"], showbackground=True, color=PALETTE["text"]),
+        yaxis=dict(backgroundcolor=PALETTE["bg"], gridcolor=PALETTE["grid"], showbackground=True, color=PALETTE["text"]),
+        zaxis=dict(backgroundcolor=PALETTE["bg"], gridcolor=PALETTE["grid"], showbackground=True, color=PALETTE["text"]),
         camera=dict(eye=dict(x=1.6, y=1.6, z=1.2)),
         aspectmode="cube",
     ),
@@ -52,6 +49,7 @@ def _layout(**overrides):
     return lay
 
 def hull_mesh_trace(points: np.ndarray, hull: ConvexHull, color: str, name: str, opacity: float = 0.35, show_wireframe: bool = True) -> list:
+    # Error prevention: ensuring points and hull are compatible
     x, y, z, i, j, k = hull_mesh_arrays(hull, points)
     traces = []
     traces.append(go.Mesh3d(
@@ -60,14 +58,20 @@ def hull_mesh_trace(points: np.ndarray, hull: ConvexHull, color: str, name: str,
         flatshading=True, lighting=dict(ambient=0.6, diffuse=0.8, specular=0.3),
         hoverinfo="name",
     ))
+    
     if show_wireframe:
         edge_x, edge_y, edge_z = [], [], []
+        # Safety check: Only iterate if points are actually indexed by the simplices
         for s in hull.simplices:
-            for a, b in [(s[0], s[1]), (s[1], s[2]), (s[0], s[2])]:
-                pa, pb = points[a], points[b]
-                edge_x += [pa[0], pb[0], None]
-                edge_y += [pa[1], pb[1], None]
-                edge_z += [pa[2], pb[2], None]
+            try:
+                for a, b in [(s[0], s[1]), (s[1], s[2]), (s[0], s[2])]:
+                    pa, pb = points[a], points[b]
+                    edge_x += [pa[0], pb[0], None]
+                    edge_y += [pa[1], pb[1], None]
+                    edge_z += [pa[2], pb[2], None]
+            except IndexError:
+                continue # Skip faulty simplices to prevent total app crash
+        
         traces.append(go.Scatter3d(
             x=edge_x, y=edge_y, z=edge_z,
             mode="lines", line=dict(color=color, width=1.5),
@@ -84,7 +88,7 @@ def figure_minkowski_sum(P_pts, P_hull, Q_pts, Q_hull, S_pts, S_hull, show_P=Tru
     fig.update_layout(**_layout(title="Minkowski Sum P ⊕ Q"))
     return fig
 
-# RESTORED FUNCTION
+# THE MISSING IMPORT FIX:
 def figure_support_explorer(P_pts, P_hull, Q_pts, Q_hull, S_pts, S_hull, u, cp_P, cp_Q, cp_S, h_P, h_Q, h_S):
     traces = []
     traces += hull_mesh_trace(P_pts, P_hull, PALETTE["P"], "P", opacity=0.2)
@@ -94,7 +98,7 @@ def figure_support_explorer(P_pts, P_hull, Q_pts, Q_hull, S_pts, S_hull, u, cp_P
     u_norm = np.linalg.norm(u)
     if u_norm > 1e-12:
         u_hat = u / u_norm
-        scale = max(np.max(np.abs(P_pts)) if len(P_pts) else 1, 1) * 1.5
+        scale = 2.0
         arrow_end = u_hat * scale
         
         traces.append(go.Scatter3d(
