@@ -8,8 +8,9 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import sys, os
 
-# Force the root directory into the path
+# This ensures Python looks in the ROOT folder for viz_helpers and geometry_core
 sys.path.append(os.getcwd())
+
 from geometry_core import make_polytope, minkowski_sum_full, _hull_vertices
 from viz_helpers import figure_minkowski_sum, figure_support_polar, PALETTE
 
