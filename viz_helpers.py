@@ -207,17 +207,22 @@ def figure_neuro_cloud(
     cloud: np.ndarray,
     hull_pts: np.ndarray,
     hull: ConvexHull,
-) -> go.Figure:
-    """Raw point cloud + its convex hull."""
-    traces = []
-
-    # Raw cloud
-    traces.append(go.Scatter3d(
-        x=cloud[:, 0], y=cloud[:, 1], z=cloud[:, 2],
-        mode="markers",
-        marker=dict(size=2.5, color=PALETTE["cloud"], opacity=0.5),
-        name="Neural state-space",
-    ))
+fig = go.Figure()
+    for hs, color, name in [
+        (hP, PALETTE["P"],   "h_P"),
+        (hQ, PALETTE["Q"],   "h_Q"),
+        (hS, PALETTE["sum"], "h_{P⊕Q}"),
+    ]:
+        # MUST BE INDENTED INSIDE THE FOR LOOP
+        fig.add_trace(go.Scatterpolar(
+            r=hs, theta=np.degrees(thetas),
+            mode="lines",
+            line=dict(color=color, width=2),
+            name=name,
+            fill="toself",
+            # This logic ensures each trace has its own transparent color
+            fillcolor=f"rgba({int(color[1:3],16)}, {int(color[3:5],16)}, {int(color[5:7],16)}, 0.15)" if color.startswith('#') else "rgba(125,125,125,0.1)"
+        ))
 
     # Hull mesh
     traces += hull_mesh_trace(hull_pts, hull, PALETTE["hull"], "Convex Hull", opacity=0.25)
