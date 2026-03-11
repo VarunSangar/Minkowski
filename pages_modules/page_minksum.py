@@ -3,7 +3,6 @@ pages_modules/page_minksum.py
 ==============================
 Page 1 — Minkowski Sum Visualizer
 """
-
 import streamlit as st
 import numpy as np
 from scipy.spatial import ConvexHull
@@ -11,7 +10,6 @@ import sys, os
 
 # Force the root directory into the path
 sys.path.append(os.getcwd())
-
 from geometry_core import make_polytope, minkowski_sum_full, _hull_vertices
 from viz_helpers import figure_minkowski_sum, figure_support_polar, PALETTE
 
