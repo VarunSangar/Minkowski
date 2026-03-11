@@ -105,10 +105,10 @@ code {
 
 # ── Import pages ─────────────────────────────────────────────────────────────
 from pages_modules import (
-    page_minksum,
-    page_support_explorer,
-    page_neuro_hull,
-    page_about,
+import pages_modules.page_minksum as page_minksum
+import pages_modules.page_support_explorer as page_support_explorer
+import pages_modules.page_neuro_hull as page_neuro_hull
+import pages_modules.page_about as page_about
 )
 
 # ── Sidebar navigation ────────────────────────────────────────────────────────
