@@ -51,14 +51,7 @@ def _layout(**overrides):
     lay.update(overrides)
     return lay
 
-def hull_mesh_trace(
-    points: np.ndarray,
-    hull: ConvexHull,
-    color: str,
-    name: str,
-    opacity: float = 0.35,
-    show_wireframe: bool = True,
-) -> list:
+def hull_mesh_trace(points: np.ndarray, hull: ConvexHull, color: str, name: str, opacity: float = 0.35, show_wireframe: bool = True) -> list:
     x, y, z, i, j, k = hull_mesh_arrays(hull, points)
     traces = []
     traces.append(go.Mesh3d(
@@ -91,6 +84,35 @@ def figure_minkowski_sum(P_pts, P_hull, Q_pts, Q_hull, S_pts, S_hull, show_P=Tru
     fig.update_layout(**_layout(title="Minkowski Sum P ⊕ Q"))
     return fig
 
+# RESTORED FUNCTION
+def figure_support_explorer(P_pts, P_hull, Q_pts, Q_hull, S_pts, S_hull, u, cp_P, cp_Q, cp_S, h_P, h_Q, h_S):
+    traces = []
+    traces += hull_mesh_trace(P_pts, P_hull, PALETTE["P"], "P", opacity=0.2)
+    traces += hull_mesh_trace(Q_pts, Q_hull, PALETTE["Q"], "Q", opacity=0.2)
+    traces += hull_mesh_trace(S_pts, S_hull, PALETTE["sum"], "P⊕Q", opacity=0.1)
+
+    u_norm = np.linalg.norm(u)
+    if u_norm > 1e-12:
+        u_hat = u / u_norm
+        scale = max(np.max(np.abs(P_pts)) if len(P_pts) else 1, 1) * 1.5
+        arrow_end = u_hat * scale
+        
+        traces.append(go.Scatter3d(
+            x=[0, arrow_end[0]], y=[0, arrow_end[1]], z=[0, arrow_end[2]],
+            mode="lines+markers", line=dict(color=PALETTE["u_vec"], width=5),
+            marker=dict(symbol=["circle", "diamond"], size=[3, 8], color=PALETTE["u_vec"]),
+            name="u direction",
+        ))
+
+        for (cp, h, color, lbl) in [(cp_P, h_P, PALETTE["P"], "H(P)"), (cp_Q, h_Q, PALETTE["Q"], "H(Q)"), (cp_S, h_S, PALETTE["sum"], "H(P⊕Q)")]:
+            X, Y, Z = hyperplane_quad(u_hat, h, size=3.0)
+            traces.append(go.Surface(x=X, y=Y, z=Z, colorscale=[[0, color], [1, color]], opacity=0.15, showscale=False, name=lbl))
+            traces.append(go.Scatter3d(x=[cp[0]], y=[cp[1]], z=[cp[2]], mode="markers", marker=dict(size=8, color=PALETTE["contact"], symbol="diamond"), name=f"contact {lbl}"))
+
+    fig = go.Figure(data=traces)
+    fig.update_layout(**_layout(title="Support Function Explorer"))
+    return fig
+
 def figure_neuro_cloud(cloud: np.ndarray, hull_pts: np.ndarray, hull: ConvexHull) -> go.Figure:
     traces = []
     traces.append(go.Scatter3d(
@@ -119,7 +141,6 @@ def figure_support_polar(P_pts, Q_pts, S_pts, plane="xy", n_theta=360) -> go.Fig
     hP, hQ, hS = h_values(P_pts), h_values(Q_pts), h_values(S_pts)
     fig = go.Figure()
     for hs, color, name in [(hP, PALETTE["P"], "h_P"), (hQ, PALETTE["Q"], "h_Q"), (hS, PALETTE["sum"], "h_{P⊕Q}")]:
-        # Convert hex to rgba for transparency support
         r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
         fig.add_trace(go.Scatterpolar(
             r=hs, theta=np.degrees(thetas), mode="lines",
