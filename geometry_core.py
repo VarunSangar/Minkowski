@@ -243,18 +243,11 @@ def make_polytope(name: str, scale: float = 1.0, center: Optional[np.ndarray] = 
 def hull_mesh_arrays(hull: ConvexHull, points: np.ndarray):
     """
     Convert scipy ConvexHull to flat arrays suitable for Plotly Mesh3d.
-
-    Returns
-    -------
-    x, y, z : 1-D vertex coordinate arrays
-    i, j, k : triangle index arrays
+    Improved version to prevent IndexErrors during subsampling.
     """
-    verts = points[hull.vertices] if hasattr(hull, 'vertices') else points
-    # Re-index simplices to local vertex numbering
-    global_to_local = {g: l for l, g in enumerate(hull.vertices)}
-    tri = np.array([[global_to_local[idx] for idx in s] for s in hull.simplices])
-    x, y, z = verts[:, 0], verts[:, 1], verts[:, 2]
-    i, j, k = tri[:, 0], tri[:, 1], tri[:, 2]
+    # Use points directly as vertices and hull.simplices for faces
+    x, y, z = points[:, 0], points[:, 1], points[:, 2]
+    i, j, k = hull.simplices[:, 0], hull.simplices[:, 1], hull.simplices[:, 2]
     return x, y, z, i, j, k
 
 
